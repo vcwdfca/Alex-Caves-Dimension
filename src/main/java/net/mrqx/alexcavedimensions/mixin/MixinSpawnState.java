@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(NaturalSpawner.SpawnState.class)
 public abstract class MixinSpawnState {
+
     @Shadow
     @Final
     private int spawnableChunkCount;

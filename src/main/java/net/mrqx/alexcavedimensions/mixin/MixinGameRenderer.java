@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
+
     @Inject(method = "getNightVisionScale(Lnet/minecraft/world/entity/LivingEntity;F)F", at = @At("HEAD"), cancellable = true)
     private static void injectGetNightVisionScale(LivingEntity livingEntity, float nanoTime, CallbackInfoReturnable<Float> cir) {
         if (!livingEntity.hasEffect(MobEffects.NIGHT_VISION) && AlexCavesDimensions.shouldDimensionHasNightVision(livingEntity.level().dimension())) {
