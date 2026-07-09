@@ -7,7 +7,7 @@ plugins {
 
 spotless {
     java {
-        target 'src/*/java/net/mrqx/alexcavedimensions/**/*.java'
+        target 'src/*/java/net/mrqx/alexcavedimensions/*/*.java'
 
         leadingTabsToSpaces()
         endWithNewline()
@@ -42,6 +42,10 @@ def replaceProperties = [
         mod_version            : mod_version,
         mod_authors            : mod_authors,
         mod_description        : mod_description,
+        alexscaves_version     : alexscaves_version,
+        jei_version            : jei_version,
+        rei_version            : rei_version,
+        emi_version            : emi_version,
 ]
 
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
@@ -65,6 +69,15 @@ sourceSets.main.resources {
 repositories {
     maven {
         url = 'https://cursemaven.com'
+    }
+    maven {
+        url = 'https://maven.blamejared.com'
+    }
+    maven {
+        url = 'https://maven.shedaniel.me'
+    }
+    maven {
+        url = 'https://maven.terraformersmc.com/releases'
     }
     mavenLocal()
     // Add here additional repositories if required by some of the dependencies below.
@@ -142,7 +155,13 @@ dependencies {
 
     implementation "curse.maven:citadel-1-21-1-port-1415723:7982052"
     implementation "curse.maven:alexs-caves-unofficial-port-1420348:7981977"
+    compileOnly "mezz.jei:jei-1.21.1-neoforge:19.22.1.316"
+    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.799"
+    compileOnly "dev.emi:emi-neoforge:1.1.22+1.21.1:api"
 
+    //localRuntime "mezz.jei:jei-1.21.1-neoforge:19.22.1.316"
+    //localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.799"
+    localRuntime "dev.emi:emi-neoforge:1.1.22+1.21.1"
 }
 
 tasks.withType(ProcessResources).configureEach {

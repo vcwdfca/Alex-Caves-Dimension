@@ -16,8 +16,12 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemCaveKey extends Item {
-    public ItemCaveKey(Properties properties) {
+
+    private final ResourceKey<Level> caveDimension;
+
+    public ItemCaveKey(Properties properties, ResourceKey<Level> caveDimension) {
         super(properties);
+        this.caveDimension = caveDimension;
     }
     
     @Override
@@ -35,24 +39,7 @@ public class ItemCaveKey extends Item {
         if (server == null) {
             return pStack;
         }
-        if (pStack.is(AlexCavesDimensions.ABYSSAL_CHASM_KEY.get())) {
-            teleportToDimension(pLivingEntity, server, targetDimension(pLevel, AlexCavesDimensions.ABYSSAL_CHASM_RESOURCE_KEY));
-        }
-        if (pStack.is(AlexCavesDimensions.CANDY_CAVITY_KEY.get())) {
-            teleportToDimension(pLivingEntity, server, targetDimension(pLevel, AlexCavesDimensions.CANDY_CAVITY_RESOURCE_KEY));
-        }
-        if (pStack.is(AlexCavesDimensions.FORLORN_HOLLOWS_KEY.get())) {
-            teleportToDimension(pLivingEntity, server, targetDimension(pLevel, AlexCavesDimensions.FORLORN_HOLLOWS_RESOURCE_KEY));
-        }
-        if (pStack.is(AlexCavesDimensions.TOXIC_CAVES_KEY.get())) {
-            teleportToDimension(pLivingEntity, server, targetDimension(pLevel, AlexCavesDimensions.TOXIC_CAVES_RESOURCE_KEY));
-        }
-        if (pStack.is(AlexCavesDimensions.PRIMORDIAL_CAVES_KEY.get())) {
-            teleportToDimension(pLivingEntity, server, targetDimension(pLevel, AlexCavesDimensions.PRIMORDIAL_CAVES_RESOURCE_KEY));
-        }
-        if (pStack.is(AlexCavesDimensions.MAGNETIC_CAVES_KEY.get())) {
-            teleportToDimension(pLivingEntity, server, targetDimension(pLevel, AlexCavesDimensions.MAGNETIC_CAVES_RESOURCE_KEY));
-        }
+        teleportToDimension(pLivingEntity, server, targetDimension(pLevel, caveDimension));
         return pStack;
     }
 

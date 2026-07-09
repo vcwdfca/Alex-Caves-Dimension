@@ -9,12 +9,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.Level;
+import net.mrqx.alexcavedimensions.compat.rei.CaveKeyRecipeTransferPayload;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import org.slf4j.Logger;
@@ -24,21 +25,11 @@ import org.slf4j.Logger;
 public class AlexCavesDimensions {
 
     public static final String MODID = "alex_caves_dimensions";
-    @SuppressWarnings("unused")
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.createItems(MODID);
     public static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(Registries.RECIPE_SERIALIZER, MODID);
 
-    public static final DeferredHolder<Item, ItemCaveKey> ABYSSAL_CHASM_KEY = ITEMS.register("abyssal_chasm_key", () -> new ItemCaveKey(new Item.Properties()));
-    public static final DeferredHolder<Item, ItemCaveKey> CANDY_CAVITY_KEY = ITEMS.register("candy_cavity_key", () -> new ItemCaveKey(new Item.Properties()));
-    public static final DeferredHolder<Item, ItemCaveKey> FORLORN_HOLLOWS_KEY = ITEMS.register("forlorn_hollows_key", () -> new ItemCaveKey(new Item.Properties()));
-    public static final DeferredHolder<Item, ItemCaveKey> TOXIC_CAVES_KEY = ITEMS.register("toxic_caves_key", () -> new ItemCaveKey(new Item.Properties()));
-    public static final DeferredHolder<Item, ItemCaveKey> PRIMORDIAL_CAVES_KEY = ITEMS.register("primordial_caves_key", () -> new ItemCaveKey(new Item.Properties()));
-    public static final DeferredHolder<Item, ItemCaveKey> MAGNETIC_CAVES_KEY = ITEMS.register("magnetic_caves_key", () -> new ItemCaveKey(new Item.Properties()));
-
-    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<RecipeCaveKey>> CAVE_KEY = RECIPE_SERIALIZERS.register("cave_key", () -> new SimpleCraftingRecipeSerializer<>(RecipeCaveKey::new));
-    
     public static final ResourceKey<Level> TOXIC_CAVES_RESOURCE_KEY = ResourceKey.create(Registries.DIMENSION,
         id("toxic_caves"));
     public static final ResourceKey<Level> PRIMORDIAL_CAVES_RESOURCE_KEY = ResourceKey.create(Registries.DIMENSION,
@@ -51,10 +42,35 @@ public class AlexCavesDimensions {
         id("candy_cavity"));
     public static final ResourceKey<Level> ABYSSAL_CHASM_RESOURCE_KEY = ResourceKey.create(Registries.DIMENSION,
         id("abyssal_chasm"));
+
+    public static final DeferredHolder<Item, ItemCaveKey> ABYSSAL_CHASM_KEY = ITEMS.register("abyssal_chasm_key",
+        () -> new ItemCaveKey(new Item.Properties(), ABYSSAL_CHASM_RESOURCE_KEY));
+    public static final DeferredHolder<Item, ItemCaveKey> CANDY_CAVITY_KEY = ITEMS.register("candy_cavity_key",
+        () -> new ItemCaveKey(new Item.Properties(), CANDY_CAVITY_RESOURCE_KEY));
+    public static final DeferredHolder<Item, ItemCaveKey> FORLORN_HOLLOWS_KEY = ITEMS.register("forlorn_hollows_key",
+        () -> new ItemCaveKey(new Item.Properties(), FORLORN_HOLLOWS_RESOURCE_KEY));
+    public static final DeferredHolder<Item, ItemCaveKey> TOXIC_CAVES_KEY = ITEMS.register("toxic_caves_key",
+        () -> new ItemCaveKey(new Item.Properties(), TOXIC_CAVES_RESOURCE_KEY));
+    public static final DeferredHolder<Item, ItemCaveKey> PRIMORDIAL_CAVES_KEY = ITEMS.register("primordial_caves_key",
+        () -> new ItemCaveKey(new Item.Properties(), PRIMORDIAL_CAVES_RESOURCE_KEY));
+    public static final DeferredHolder<Item, ItemCaveKey> MAGNETIC_CAVES_KEY = ITEMS.register("magnetic_caves_key",
+        () -> new ItemCaveKey(new Item.Properties(), MAGNETIC_CAVES_RESOURCE_KEY));
+
+    public static final DeferredHolder<RecipeSerializer<?>, SimpleCraftingRecipeSerializer<RecipeCaveKey>> CAVE_KEY = RECIPE_SERIALIZERS.register("cave_key", () -> new SimpleCraftingRecipeSerializer<>(RecipeCaveKey::new));
     
-    public AlexCavesDimensions(IEventBus modEventBus, ModContainer modContainer) {
+    public AlexCavesDimensions(IEventBus modEventBus) {
         ITEMS.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
+        modEventBus.addListener(this::registerPayloadHandlers);
+    }
+
+    private void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
+        event.registrar("1")
+            .playToServer(
+                CaveKeyRecipeTransferPayload.TYPE,
+                CaveKeyRecipeTransferPayload.STREAM_CODEC,
+                CaveKeyRecipeTransferPayload::handle
+            );
     }
     
     @SubscribeEvent

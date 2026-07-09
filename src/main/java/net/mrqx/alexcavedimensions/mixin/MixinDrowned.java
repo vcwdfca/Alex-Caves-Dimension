@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Drowned.class)
 public class MixinDrowned {
+
     @Inject(method = "checkDrownedSpawnRules(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/ServerLevelAccessor;Lnet/minecraft/world/entity/MobSpawnType;Lnet/minecraft/core/BlockPos;Lnet/minecraft/util/RandomSource;)Z", at = @At("RETURN"), cancellable = true)
     private static void injectCheckMobSpawnRules(EntityType<Drowned> drowned, ServerLevelAccessor level, MobSpawnType mobSpawnType, BlockPos pos, RandomSource random, CallbackInfoReturnable<Boolean> cir) {
         if (mobSpawnType != MobSpawnType.SPAWNER

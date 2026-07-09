@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(NaturalSpawner.SpawnState.class)
 public interface AccessorSpawnState {
+
     @Invoker("canSpawn")
     boolean alex_caves_dimensions$canSpawn(EntityType<?> entityType, BlockPos pos, ChunkAccess chunk);
 

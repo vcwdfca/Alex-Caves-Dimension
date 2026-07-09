@@ -14,28 +14,42 @@ config="alex_caves_dimensions.mixins.json"
 
 [[dependencies.${mod_id}]]
     modId="neoforge"
-    mandatory=true
+    type="required"
     versionRange="[${neo_version},)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="minecraft"
-    mandatory=true
+    type="required"
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
     modId="alexscaves"
-    mandatory=true
-    versionRange="[0,)"
+    type="required"
+    versionRange="[${alexscaves_version},)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.${mod_id}]]
-    modId="citadel"
-    mandatory=true
-    versionRange="[0,)"
+    modId="jei"
+    type="optional"
+    versionRange="[${jei_version},)"
     ordering="NONE"
-    side="BOTH"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="roughlyenoughitems"
+    type="optional"
+    versionRange="[${rei_version},)"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.${mod_id}]]
+    modId="emi"
+    type="optional"
+    versionRange="[${emi_version},)"
+    ordering="NONE"
+    side="CLIENT"
