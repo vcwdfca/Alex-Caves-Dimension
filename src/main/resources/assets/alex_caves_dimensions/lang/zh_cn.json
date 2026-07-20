@@ -4,5 +4,7 @@
   "item.alex_caves_dimensions.forlorn_hollows_key": "异教徒圆章",
   "item.alex_caves_dimensions.toxic_caves_key": "翠砷铜铀",
   "item.alex_caves_dimensions.primordial_caves_key": "始祖原矿",
-  "item.alex_caves_dimensions.magnetic_caves_key": "方铅磁铁"
+  "item.alex_caves_dimensions.magnetic_caves_key": "方铅磁铁",
+  "item.alex_caves_dimensions.prismatic_depths_key": "棱彩深渊",
+  "itemGroup.alex_caves_dimensions.prismatic_depths": "棱彩深渊"
 }

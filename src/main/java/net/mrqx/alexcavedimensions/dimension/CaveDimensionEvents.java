@@ -1,8 +1,9 @@
-package net.mrqx.alexcavedimensions;
+package net.mrqx.alexcavedimensions.dimension;
 
 import com.github.alexmodguy.alexscaves.AlexsCaves;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.mrqx.alexcavedimensions.AlexCavesDimensions;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;

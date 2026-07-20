@@ -7,7 +7,7 @@ plugins {
 
 spotless {
     java {
-        target 'src/*/java/net/mrqx/alexcavedimensions/*/*.java'
+        target 'src/*/java/net/mrqx/alexcavedimensions/**/*.java'
 
         leadingTabsToSpaces()
         endWithNewline()
@@ -159,9 +159,9 @@ dependencies {
     compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.799"
     compileOnly "dev.emi:emi-neoforge:1.1.22+1.21.1:api"
 
-    //localRuntime "mezz.jei:jei-1.21.1-neoforge:19.22.1.316"
+    localRuntime "mezz.jei:jei-1.21.1-neoforge:19.22.1.316"
     //localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.799"
-    localRuntime "dev.emi:emi-neoforge:1.1.22+1.21.1"
+    //localRuntime "dev.emi:emi-neoforge:1.1.22+1.21.1"
 }
 
 tasks.withType(ProcessResources).configureEach {

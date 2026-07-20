@@ -1,4 +1,4 @@
-package net.mrqx.alexcavedimensions;
+package net.mrqx.alexcavedimensions.item;
 
 import com.github.alexmodguy.alexscaves.server.item.ACItemRegistry;
 import com.github.alexmodguy.alexscaves.server.item.CaveInfoItem;
@@ -14,6 +14,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.biome.Biome;
+import net.mrqx.alexcavedimensions.AlexCavesDimensions;
 import net.mrqx.alexcavedimensions.compat.CaveKeyRecipeDisplays;
 import org.jetbrains.annotations.NotNull;
 

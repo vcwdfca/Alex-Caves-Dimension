@@ -27,8 +27,6 @@ import java.util.List;
 public class CaveKeyJeiPlugin implements IModPlugin {
 
     private static final ResourceLocation PLUGIN_ID = AlexCavesDimensions.id("jei");
-    private static final ResourceLocation REAL_RECIPE_ID = AlexCavesDimensions.id("cave_keys");
-
     @Override
     public @NotNull ResourceLocation getPluginUid() {
         return PLUGIN_ID;
@@ -42,6 +40,7 @@ public class CaveKeyJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
         registration.addRecipes(RecipeTypes.CRAFTING, CaveKeyRecipeDisplays.syntheticRecipes());
+        registration.addRecipes(RecipeTypes.CRAFTING, CaveKeyRecipeDisplays.prismaticDepthsRecipes());
     }
 
     @Override
@@ -50,11 +49,11 @@ public class CaveKeyJeiPlugin implements IModPlugin {
                 .createRecipeLookup(RecipeTypes.CRAFTING)
                 .includeHidden()
                 .get()
-                .filter(recipeHolder -> REAL_RECIPE_ID.equals(recipeHolder.id()))
+                .filter(recipeHolder -> CaveKeyRecipeDisplays.hiddenRealRecipeIds().contains(recipeHolder.id()))
                 .toList();
 
         if (realRecipes.isEmpty()) {
-            AlexCavesDimensions.LOGGER.warn("Cannot hide JEI cave key recipe: recipe {} was not found", REAL_RECIPE_ID);
+            AlexCavesDimensions.LOGGER.warn("Cannot hide JEI cave key recipes: none of {} were found", CaveKeyRecipeDisplays.hiddenRealRecipeIds());
             return;
         }
 

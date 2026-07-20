@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FDA",
+    "GEB",
+    "HDC"
+  ],
+  "key": {
+    "A": "alex_caves_dimensions:abyssal_chasm_key",
+    "B": "alex_caves_dimensions:candy_cavity_key",
+    "C": "alex_caves_dimensions:forlorn_hollows_key",
+    "D": "minecraft:dragon_breath",
+    "E": "minecraft:magma_cream",
+    "F": "alex_caves_dimensions:magnetic_caves_key",
+    "G": "alex_caves_dimensions:primordial_caves_key",
+    "H": "alex_caves_dimensions:toxic_caves_key"
+  },
+  "result": {
+    "id": "alex_caves_dimensions:prismatic_depths_key"
+  }
+}

@@ -16,13 +16,14 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.biome.Biome;
 import net.mrqx.alexcavedimensions.AlexCavesDimensions;
-import net.mrqx.alexcavedimensions.ItemCaveKey;
+import net.mrqx.alexcavedimensions.item.ItemCaveKey;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -38,6 +39,9 @@ public final class CaveKeyRecipeDisplays {
         variant("primordial_caves", ACBiomeRegistry.PRIMORDIAL_CAVES, AlexCavesDimensions.PRIMORDIAL_CAVES_KEY),
         variant("toxic_caves", ACBiomeRegistry.TOXIC_CAVES, AlexCavesDimensions.TOXIC_CAVES_KEY)
     );
+    private static final ResourceLocation REAL_CAVE_KEY_RECIPE_ID = AlexCavesDimensions.id("cave_keys");
+    private static final ResourceLocation REAL_PRISMATIC_HORIZONTAL_RECIPE_ID = AlexCavesDimensions.id("prismatic_depths_key_horizontal");
+    private static final ResourceLocation REAL_PRISMATIC_VERTICAL_RECIPE_ID = AlexCavesDimensions.id("prismatic_depths_key_vertical");
 
     private CaveKeyRecipeDisplays() {
     }
@@ -64,6 +68,17 @@ public final class CaveKeyRecipeDisplays {
             .toList();
     }
 
+    public static @NotNull List<RecipeHolder<CraftingRecipe>> prismaticDepthsRecipes() {
+        return List.of(
+            prismaticDepthsRecipe("display/prismatic_depths_key_horizontal", false),
+            prismaticDepthsRecipe("display/prismatic_depths_key_vertical", true)
+        );
+    }
+
+    public static @NotNull Set<ResourceLocation> hiddenRealRecipeIds() {
+        return Set.of(REAL_CAVE_KEY_RECIPE_ID, REAL_PRISMATIC_HORIZONTAL_RECIPE_ID, REAL_PRISMATIC_VERTICAL_RECIPE_ID);
+    }
+
     public static @NotNull Optional<Variant> variantByRecipeId(@NotNull ResourceLocation id) {
         return Optional.ofNullable(VARIANTS_BY_RECIPE_ID.get(id));
     }
@@ -77,6 +92,31 @@ public final class CaveKeyRecipeDisplays {
             Ingredient.of(Items.BLAZE_POWDER), Ingredient.of(Items.ENDER_PEARL), Ingredient.of(Items.BLAZE_POWDER),
             Ingredient.of(Items.ENDER_PEARL), center, Ingredient.of(Items.ENDER_PEARL),
             Ingredient.of(Items.BLAZE_POWDER), Ingredient.of(Items.ENDER_PEARL), Ingredient.of(Items.BLAZE_POWDER));
+    }
+
+    private static @NotNull RecipeHolder<CraftingRecipe> prismaticDepthsRecipe(@NotNull String path, boolean vertical) {
+        NonNullList<Ingredient> ingredients = vertical ? prismaticVerticalIngredients() : prismaticHorizontalIngredients();
+        ShapedRecipe recipe = new ShapedRecipe(
+            "",
+            CraftingBookCategory.MISC,
+            new ShapedRecipePattern(3, 3, ingredients, Optional.empty()),
+            AlexCavesDimensions.PRISMATIC_DEPTHS_KEY.get().getDefaultInstance()
+        );
+        return new RecipeHolder<>(AlexCavesDimensions.id(path), recipe);
+    }
+
+    private static @NotNull NonNullList<Ingredient> prismaticHorizontalIngredients() {
+        return NonNullList.of(Ingredient.EMPTY,
+            Ingredient.of(AlexCavesDimensions.ABYSSAL_CHASM_KEY.get()), Ingredient.of(AlexCavesDimensions.CANDY_CAVITY_KEY.get()), Ingredient.of(AlexCavesDimensions.FORLORN_HOLLOWS_KEY.get()),
+            Ingredient.of(Items.DRAGON_BREATH), Ingredient.of(Items.MAGMA_CREAM), Ingredient.of(Items.DRAGON_BREATH),
+            Ingredient.of(AlexCavesDimensions.MAGNETIC_CAVES_KEY.get()), Ingredient.of(AlexCavesDimensions.PRIMORDIAL_CAVES_KEY.get()), Ingredient.of(AlexCavesDimensions.TOXIC_CAVES_KEY.get()));
+    }
+
+    private static @NotNull NonNullList<Ingredient> prismaticVerticalIngredients() {
+        return NonNullList.of(Ingredient.EMPTY,
+            Ingredient.of(AlexCavesDimensions.MAGNETIC_CAVES_KEY.get()), Ingredient.of(Items.DRAGON_BREATH), Ingredient.of(AlexCavesDimensions.ABYSSAL_CHASM_KEY.get()),
+            Ingredient.of(AlexCavesDimensions.PRIMORDIAL_CAVES_KEY.get()), Ingredient.of(Items.MAGMA_CREAM), Ingredient.of(AlexCavesDimensions.CANDY_CAVITY_KEY.get()),
+            Ingredient.of(AlexCavesDimensions.TOXIC_CAVES_KEY.get()), Ingredient.of(Items.DRAGON_BREATH), Ingredient.of(AlexCavesDimensions.FORLORN_HOLLOWS_KEY.get()));
     }
 
     private static @NotNull Map.Entry<ResourceLocation, Variant> variant(

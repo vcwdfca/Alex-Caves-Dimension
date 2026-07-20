@@ -2,6 +2,8 @@ package net.mrqx.alexcavedimensions.mixin;
 
 import com.github.alexmodguy.alexscaves.server.level.structure.piece.OceanTrenchStructurePiece;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
@@ -26,7 +28,8 @@ public class MixinOceanTrenchStructurePiece {
     @Inject(method = "getTrenchRadius", at = @At("RETURN"), cancellable = true, remap = false)
     private void injectGetRadiusSq(int x, int z, CallbackInfoReturnable<Double> cir) {
         if (alex_caves_dimensions$level instanceof WorldGenRegion worldGenRegion) {
-            if (worldGenRegion.getLevel().dimension().location().getNamespace().equals(AlexCavesDimensions.MODID)) {
+            ResourceLocation dimensionId = worldGenRegion.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).getKey(worldGenRegion.dimensionType());
+            if (dimensionId != null && dimensionId.getNamespace().equals(AlexCavesDimensions.MODID)) {
                 cir.setReturnValue(cir.getReturnValue() * 10);
             }
         }
@@ -39,12 +42,12 @@ public class MixinOceanTrenchStructurePiece {
     )
     private void injectPostProcess(
         WorldGenLevel level,
-        StructureManager structureManager,
-        ChunkGenerator generator,
+        StructureManager featureManager,
+        ChunkGenerator chunkGen,
         RandomSource random,
-        BoundingBox box,
+        BoundingBox boundingBox,
         ChunkPos chunkPos,
-        BlockPos pos,
+        BlockPos blockPos,
         CallbackInfo ci
     ) {
         this.alex_caves_dimensions$level = level;
