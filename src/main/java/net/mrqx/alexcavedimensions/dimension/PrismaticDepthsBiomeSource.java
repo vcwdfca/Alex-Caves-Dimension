@@ -4,13 +4,18 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.QuartPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import net.mrqx.alexcavedimensions.config.PrismaticDepthsConfig;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public final class PrismaticDepthsBiomeSource extends BiomeSource {
@@ -30,6 +35,9 @@ public final class PrismaticDepthsBiomeSource extends BiomeSource {
     private final Holder<Biome> magneticCaves;
     private final Holder<Biome> primordialCaves;
     private final Holder<Biome> toxicCaves;
+    private final List<HorizontalBiome> horizontalBiomes;
+    private final List<HorizontalBiomeGroup> individualHorizontalBiomeGroups;
+    private final double horizontalSampleScale;
 
     public PrismaticDepthsBiomeSource(
         Holder<Biome> abyssalChasm,
@@ -45,6 +53,9 @@ public final class PrismaticDepthsBiomeSource extends BiomeSource {
         this.magneticCaves = magneticCaves;
         this.primordialCaves = primordialCaves;
         this.toxicCaves = toxicCaves;
+        this.horizontalBiomes = this.createHorizontalBiomes();
+        this.individualHorizontalBiomeGroups = this.createIndividualHorizontalBiomeGroups();
+        this.horizontalSampleScale = PrismaticDepthsConfig.horizontalBiomeSampleMultiplier();
     }
 
     @Override
@@ -54,7 +65,15 @@ public final class PrismaticDepthsBiomeSource extends BiomeSource {
 
     @Override
     protected @NotNull Stream<Holder<Biome>> collectPossibleBiomes() {
-        return PrismaticDepthsConfig.verticalOrder().stream().map(this::holderForBiome);
+        List<String> order = PrismaticDepthsConfig.verticalOrder();
+        if (!PrismaticDepthsConfig.usesVerticalLayers()
+            && PrismaticDepthsConfig.horizontalDensityMode() == PrismaticDepthsConfig.HorizontalDensityMode.INDIVIDUAL
+            && order.stream().anyMatch(biome -> PrismaticDepthsConfig.individualBiomeSampleMultiplier(biome) > 0)) {
+            return order.stream()
+                .filter(biome -> PrismaticDepthsConfig.individualBiomeSampleMultiplier(biome) > 0)
+                .map(this::holderForBiome);
+        }
+        return order.stream().map(this::holderForBiome);
     }
 
     @Override
@@ -62,7 +81,12 @@ public final class PrismaticDepthsBiomeSource extends BiomeSource {
         if (PrismaticDepthsConfig.usesVerticalLayers()) {
             return biomeForVerticalY(QuartPos.toBlock(y));
         }
-        return biomeForClimate(sampler.sample(x, y, z));
+        if (PrismaticDepthsConfig.horizontalDensityMode() == PrismaticDepthsConfig.HorizontalDensityMode.INDIVIDUAL) {
+            return biomeForIndividualDensity(x, z, sampler);
+        }
+        // Multi-noise mode is a horizontal tiling mode. Sampling a fixed climate
+        // elevation keeps each cave biome consistent throughout its vertical column.
+        return biomeForDensity(x, z, this.horizontalSampleScale, this.horizontalBiomes, sampler);
     }
 
     private @NotNull Holder<Biome> biomeForVerticalY(int y) {
@@ -76,21 +100,86 @@ public final class PrismaticDepthsBiomeSource extends BiomeSource {
         return holderForBiome(biome);
     }
 
-    private @NotNull Holder<Biome> biomeForClimate(Climate.TargetPoint point) {
+    private List<HorizontalBiome> createHorizontalBiomes() {
         List<Integer> centers = PrismaticDepthsConfig.multiNoiseCenters();
         List<String> order = PrismaticDepthsConfig.verticalOrder();
-        int winner = 0;
-        long bestDistance = Long.MAX_VALUE;
+        List<HorizontalBiome> biomes = new ArrayList<>(order.size());
         for (int index = 0; index < order.size(); index++) {
-            long temperatureDistance = point.temperature() - centers.get(index * 2);
-            long humidityDistance = point.humidity() - centers.get(index * 2 + 1);
-            long distance = temperatureDistance * temperatureDistance + humidityDistance * humidityDistance;
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                winner = index;
+            biomes.add(new HorizontalBiome(
+                this.holderForBiome(order.get(index)),
+                centers.get(index * 2),
+                centers.get(index * 2 + 1)
+            ));
+        }
+        return List.copyOf(biomes);
+    }
+
+    private List<HorizontalBiomeGroup> createIndividualHorizontalBiomeGroups() {
+        List<Integer> centers = PrismaticDepthsConfig.multiNoiseCenters();
+        List<String> order = PrismaticDepthsConfig.verticalOrder();
+        boolean equalMultiplierFallback = order.stream().noneMatch(biome -> PrismaticDepthsConfig.individualBiomeSampleMultiplier(biome) > 0);
+        Map<Double, List<HorizontalBiome>> biomesByMultiplier = new LinkedHashMap<>();
+        for (int index = 0; index < order.size(); index++) {
+            String biome = order.get(index);
+            double multiplier = equalMultiplierFallback ? 1.0 : PrismaticDepthsConfig.individualBiomeSampleMultiplier(biome);
+            if (multiplier == 0) {
+                continue;
+            }
+            biomesByMultiplier.computeIfAbsent(multiplier, ignored -> new ArrayList<>()).add(new HorizontalBiome(
+                this.holderForBiome(biome),
+                centers.get(index * 2),
+                centers.get(index * 2 + 1)
+            ));
+        }
+        return biomesByMultiplier.entrySet().stream()
+            .map(entry -> new HorizontalBiomeGroup(entry.getKey(), List.copyOf(entry.getValue())))
+            .toList();
+    }
+
+    private @NotNull Holder<Biome> biomeForIndividualDensity(int x, int z, Climate.Sampler sampler) {
+        HorizontalBiome selected = this.individualHorizontalBiomeGroups.getFirst().biomes().getFirst();
+        long nearestDistance = Long.MAX_VALUE;
+        for (HorizontalBiomeGroup group : this.individualHorizontalBiomeGroups) {
+            ClimateSample sample = sampleClimate(x, z, group.sampleScale(), sampler);
+            for (HorizontalBiome biome : group.biomes()) {
+                long distance = biome.distanceTo(sample);
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    selected = biome;
+                }
             }
         }
-        return holderForBiome(order.get(winner));
+        return selected.biome();
+    }
+
+    private static @NotNull Holder<Biome> biomeForDensity(
+        int x,
+        int z,
+        double scale,
+        List<HorizontalBiome> biomes,
+        Climate.Sampler sampler
+    ) {
+        ClimateSample sample = sampleClimate(x, z, scale, sampler);
+        HorizontalBiome selected = biomes.getFirst();
+        long nearestDistance = Long.MAX_VALUE;
+        for (HorizontalBiome biome : biomes) {
+            long distance = biome.distanceTo(sample);
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                selected = biome;
+            }
+        }
+        return selected.biome();
+    }
+
+    private static ClimateSample sampleClimate(int x, int z, double scale, Climate.Sampler sampler) {
+        int sampleX = QuartPos.toBlock(Mth.floor((double)x * scale));
+        int sampleZ = QuartPos.toBlock(Mth.floor((double)z * scale));
+        DensityFunction.SinglePointContext context = new DensityFunction.SinglePointContext(sampleX, 0, sampleZ);
+        return new ClimateSample(
+            Climate.quantizeCoord((float)sampler.temperature().compute(context)),
+            Climate.quantizeCoord((float)sampler.humidity().compute(context))
+        );
     }
 
     private @NotNull Holder<Biome> holderForBiome(String biome) {
@@ -103,4 +192,16 @@ public final class PrismaticDepthsBiomeSource extends BiomeSource {
             default -> primordialCaves;
         };
     }
+
+    private record HorizontalBiome(Holder<Biome> biome, long temperatureCenter, long humidityCenter) {
+        private long distanceTo(ClimateSample sample) {
+            long temperatureDistance = sample.temperature() - this.temperatureCenter;
+            long humidityDistance = sample.humidity() - this.humidityCenter;
+            return temperatureDistance * temperatureDistance + humidityDistance * humidityDistance;
+        }
+    }
+
+    private record HorizontalBiomeGroup(double sampleScale, List<HorizontalBiome> biomes) {}
+
+    private record ClimateSample(long temperature, long humidity) {}
 }

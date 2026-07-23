@@ -40,7 +40,6 @@ public class CaveKeyJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
         registration.addRecipes(RecipeTypes.CRAFTING, CaveKeyRecipeDisplays.syntheticRecipes());
-        registration.addRecipes(RecipeTypes.CRAFTING, CaveKeyRecipeDisplays.prismaticDepthsRecipes());
     }
 
     @Override

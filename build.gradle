@@ -103,33 +103,33 @@ runs {
         // "SCAN": For mods scan.
         // "REGISTRIES": For firing of registry events.
         // "REGISTRYDUMP": For getting the contents of all registries.
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
+        systemProperties.put('forge.logging.markers', 'REGISTRIES')
 
         // Recommended logging level for the console
         // You can set various levels here.
         // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-        systemProperty 'forge.logging.console.level', 'debug'
+        systemProperties.put('forge.logging.console.level', 'debug')
 
-        workingDirectory project.layout.projectDirectory.dir('run').dir(name)
+        workingDirectory.set(project.layout.projectDirectory.dir('run').dir(name))
 
-        modSource project.sourceSets.main
+        modSource((SourceSet) sourceSets.getByName('main'))
     }
 
     client {
         // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        systemProperties.put('neoforge.enabledGameTestNamespaces', project.mod_id.toString())
     }
 
     server {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        argument '--nogui'
+        systemProperties.put('neoforge.enabledGameTestNamespaces', project.mod_id.toString())
+        arguments.add('--nogui')
     }
 
     // This run config launches GameTestServer and runs all registered gametests, then exits.
     // By default, the server will crash when no gametests are provided.
     // The gametest system is also enabled by default for other run configs under the /test command.
     gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        systemProperties.put('neoforge.enabledGameTestNamespaces', project.mod_id.toString())
     }
 
     data {
@@ -137,7 +137,12 @@ runs {
         // workingDirectory project.file('run-data')
 
         // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        arguments.addAll([
+                '--mod', project.mod_id.toString(),
+                '--all',
+                '--output', file('src/generated/resources/').absolutePath,
+                '--existing', file('src/main/resources/').absolutePath
+        ])
     }
 }
 
@@ -159,7 +164,7 @@ dependencies {
     compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.799"
     compileOnly "dev.emi:emi-neoforge:1.1.22+1.21.1:api"
 
-    localRuntime "mezz.jei:jei-1.21.1-neoforge:19.22.1.316"
+    //localRuntime "mezz.jei:jei-1.21.1-neoforge:19.22.1.316"
     //localRuntime "me.shedaniel:RoughlyEnoughItems-neoforge:16.0.799"
     //localRuntime "dev.emi:emi-neoforge:1.1.22+1.21.1"
 }
@@ -172,12 +177,12 @@ tasks.withType(ProcessResources).configureEach {
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            from components.java
+            from((SoftwareComponent) components.getByName('java'))
         }
     }
     repositories {
         maven {
-            url "file://${project.projectDir}/repo"
+            url = "file://${project.projectDir}/repo"
         }
     }
 }

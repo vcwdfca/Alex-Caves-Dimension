@@ -20,6 +20,7 @@ import net.mrqx.alexcavedimensions.dimension.PrismaticDepthsBiomeSource;
 import net.mrqx.alexcavedimensions.dimension.PrismaticDepthsChunkGenerator;
 import net.mrqx.alexcavedimensions.item.ItemCaveKey;
 import net.mrqx.alexcavedimensions.item.RecipeCaveKey;
+import net.mrqx.alexcavedimensions.network.CaveKeyLoadingPayload;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -104,6 +105,11 @@ public class AlexCavesDimensions {
 
     private void registerPayloadHandlers(RegisterPayloadHandlersEvent event) {
         event.registrar("1")
+            .playToClient(
+                CaveKeyLoadingPayload.TYPE,
+                CaveKeyLoadingPayload.STREAM_CODEC,
+                CaveKeyLoadingPayload::handle
+            )
             .playToServer(
                 CaveKeyRecipeTransferPayload.TYPE,
                 CaveKeyRecipeTransferPayload.STREAM_CODEC,

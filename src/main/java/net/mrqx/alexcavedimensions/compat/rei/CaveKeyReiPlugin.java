@@ -24,13 +24,6 @@ public class CaveKeyReiPlugin implements REIClientPlugin {
             }
             registry.add(display);
         });
-        CaveKeyRecipeDisplays.prismaticDepthsRecipes().forEach(recipe -> {
-            DefaultCraftingDisplay<?> display = DefaultCraftingDisplay.of(recipe);
-            if (display == null) {
-                throw new IllegalStateException("Failed to create REI display for Prismatic Depths recipe " + recipe.id());
-            }
-            registry.add(display);
-        });
     }
 
     @Override
